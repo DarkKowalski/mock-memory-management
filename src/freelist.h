@@ -7,6 +7,33 @@
 #define MEMORY_SIZE (640)
 #define UNUSED_ID   (-1)
 
+#define PRINT_LINE()                                                           \
+    do                                                                         \
+    {                                                                          \
+        printf("+---------------------------------------+\n");                 \
+    } while (0)
+
+#define PRINT_HEADER()                                                         \
+    do                                                                         \
+    {                                                                          \
+        PRINT_LINE();                                                          \
+        printf("|index\t|PID\t|size\t|offset\t\t|\n");                         \
+    } while (0)
+
+#define PRINT_ALLOC(index, pid, size, start, end)                              \
+    do                                                                         \
+    {                                                                          \
+        printf("|%d\t|%d\t|%d\t|%d - %d\t|\n", (index), (pid), (size),         \
+               (start), (end));                                                \
+    } while (0)
+
+#define PRINT_FREE(index, size, start, end)                                    \
+    do                                                                         \
+    {                                                                          \
+        printf("|%d\t|%s\t|%d\t|%d - %d\t|\n", (index), ("free"), (size),      \
+               (start), (end));                                                \
+    } while (0)
+
 typedef struct node
 {
     int          id;
@@ -92,6 +119,7 @@ void free_node(freelist *list, int id)
         }
     }
 }
+
 node *first_match_alloc(freelist *list, int id, int size)
 {
     if (list == NULL || list->head == NULL || list->head->next == NULL)
@@ -207,30 +235,23 @@ void print_list(freelist *list)
     if (list == NULL || list->head == NULL)
         return;
 
-    for (int i = 0; i < 80; i++)
-        printf("=");
-    printf("\n");
-
+    PRINT_HEADER();
     int   index = 0;
     node *current = list->head->next;
     while (current != NULL)
     {
+        PRINT_LINE();
         node *next = current->next;
         if (current->avaliable)
-        {
-            printf("[INFO]: Index: %d, Avaliable, size %d, from %d to %d\n",
-                   index, current->size, current->start, current->end);
-            index++;
-        }
+            PRINT_FREE(index, current->size, current->start, current->end);
         else
-        {
-            printf("[INFO]: Index: %d, ID: %d, size %d, from %d to %d\n", index,
-                   current->id, current->size, current->start, current->end);
-            index++;
-        }
+            PRINT_ALLOC(index, current->id, current->size, current->start,
+                        current->end);
 
+        index++;
         current = next;
     }
+    PRINT_LINE();
     printf("\n");
 }
 
